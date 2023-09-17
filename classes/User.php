@@ -7,7 +7,23 @@ class User{
     private ?string $firstname;
     private ?string $lastname;
     private ?string $password;
-  
+    private $db;
+
+public function __construct()
+{
+    $db = "mysql:host=localhost;dbname=moduleconnexionb2";
+
+$host = "root";
+
+$password = "";
+
+try {
+    $this->db = new PDO($db, $host, $password);
+    // echo "connexion réussie";
+} catch(PDOException $e) {
+    die('Erreur:' . $e->getMessage());
+}
+}
 
 public function getId()
 {
@@ -62,9 +78,9 @@ public function setPassword($password)
 
 
 public function checkLoginExist($login){
-    require_once('../db-connect.php');
+   
 
-    $query = $bdd->prepare('SELECT `login` FROM utilisateurs WHERE login = :login');
+    $query = $this->db->prepare('SELECT `login` FROM utilisateurs WHERE login = :login');
     $query->bindParam(':login', $login, PDO::PARAM_STR, 255);
     $query->execute();
 
@@ -89,7 +105,7 @@ public function checkPassword($password){
 }
 
 public function register($login, $firstname, $lastname, $password){
-    require_once('../db-connect.php');
+    
     
     $login = trim(htmlspecialchars($_POST['login']));
     $firstname = trim(htmlspecialchars($_POST['firstname']));
@@ -105,7 +121,7 @@ public function register($login, $firstname, $lastname, $password){
        echo $mess_champ;  
       
     }else{
-        $query = $bdd->prepare('SELECT * FROM user WHERE login = :login');
+        $query = $this->db->prepare('SELECT * FROM user WHERE login = :login');
         $query->bindParam(':login', $login, PDO::PARAM_STR, 255);
         $query->execute();
         $result = $query->fetch();
@@ -114,7 +130,7 @@ public function register($login, $firstname, $lastname, $password){
         }else{
             if($password){
                 $pass_hash = password_hash($password, PASSWORD_BCRYPT);
-                $query = $bdd->prepare('INSERT INTO user(login,firstname,lastname,password) VALUES(:login, :firstname, :lastname, :password)');
+                $query = $this->db->prepare('INSERT INTO user(login,firstname,lastname,password) VALUES(:login, :firstname, :lastname, :password)');
                 $query->bindParam(':login', $login, PDO::PARAM_STR, 255);
                 $query->bindParam(':firstname', $firstname, PDO::PARAM_STR, 255);
                 $query->bindParam(':lastname', $lastname, PDO::PARAM_STR, 255);
@@ -129,7 +145,7 @@ public function register($login, $firstname, $lastname, $password){
 
 
 public function connect($login, $password){
-    require_once('../db-connect.php');
+    
 
     $mess_error = "Veuillez saisir tous les champs";
     $mess_ident = "Identifiants incorrect";
@@ -141,21 +157,23 @@ public function connect($login, $password){
     if(empty($login) || empty($password)){
         echo $mess_error;
     }else{
-        $query = $bdd->prepare('SELECT COUNT(*) FROM user WHERE login = :login');
+        $query = $this->db->prepare('SELECT COUNT(*) FROM user WHERE login = :login');
         $query->bindparam(':login', $login);
         $query->execute();
         $count = $query->fetchColumn();
         if($count>0){
-            $query = $bdd->prepare('SELECT * FROM user WHERE login = :login');
+            $query = $this->db->prepare('SELECT * FROM user WHERE login = :login');
             $query->bindParam(':login', $login);
             $query->execute();
             $row = $query-> fetch(PDO::FETCH_ASSOC);
             if(password_verify($password,$row['password'])){
-                session_start();
+                //session_start();
                 $_SESSION['login'] = $row['login'];
                 $_SESSION['firstname'] = $row['firstname'];
                 $_SESSION['lastname'] = $row['lastname'];
                 $_SESSION['id'] = $row['id'];
+                $_SESSION['password'] = password_verify($password,$row['password']);
+                header('Location:../view/profil.php');
                 echo $mess_done;
             }else{
                 echo $mess_ident;
@@ -169,11 +187,10 @@ public function connect($login, $password){
 
 
 public function updateUser($id, $login, $firstname, $lastname, $password){
-    require('../db-connect.php');
-  
-    $pass_hash = password_hash($password, PASSWORD_BCRYPT);
+
+        $pass_hash = password_hash($password, PASSWORD_BCRYPT);
     
-        $query = $bdd->prepare("UPDATE user SET login = :login, firstname = :firstname, lastname = :lastname, password = :password WHERE id =:id");
+        $query = $this->db->prepare("UPDATE user SET login = :login, firstname = :firstname, lastname = :lastname, password = :password WHERE id =:id");
         $query->bindParam(':id', $id);
         $query->bindParam(':login', $login);
         $query->bindParam(':firstname', $firstname);
@@ -186,6 +203,7 @@ public function updateUser($id, $login, $firstname, $lastname, $password){
         $_SESSION['firstname'] = $firstname;
         $_SESSION['lastname'] = $lastname;
         $_SESSION['password'] = $password;
+        $_SESSION['pass_hash'] = $pass_hash;
     
 }
 
@@ -194,7 +212,7 @@ public function deconnexion(){
 
         session_start();
         session_destroy();
-        header('Location: ../view/connexion.php');
+        header('Location: ../view/index.php');
         exit();
 }
 
@@ -204,7 +222,7 @@ public function deconnexion(){
 
 
 
-
+ 
 
 
 

@@ -1,5 +1,8 @@
 <?php
+session_start();
+
 require_once('../controller/connexion.php');
+
 ?>
 
 <!DOCTYPE html>
@@ -7,10 +10,11 @@ require_once('../controller/connexion.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet/less" type="text/css" href="style.less">
-    <script type="text/javascript" src="less.js"></script>
+    <link rel="stylesheet" href="../styleHeader.css">
+    <link rel="stylesheet" href="../style.css">
     <title>Document</title>
 </head>
+<?php require_once('header.php') ?>
 <body>
 
 <div class="wrapper">
@@ -22,7 +26,7 @@ require_once('../controller/connexion.php');
             <p id="mess_form"></p>
             <button type="submit" id = "submit" name="submit">Se connecter</button>
         </form>
-        </div>
+    </div>
 	
 	<ul class="bg-bubbles">
 		<li></li>
