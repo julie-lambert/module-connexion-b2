@@ -9,7 +9,7 @@
                     <a href="../controller/deconnexion.php" id="deconnexion">Déconnexion</a>
                 <?php else : ?>
                     <h3>Bienvenue <?php echo $_SESSION['login']; ?></h3>
-                    <a href="./view/profil.php">Modifier le Profil</a>
+                    <a href="./view/profil.php">Profil</a>
                     <a href="../controller/deconnexion.php" id="deconnexion">Déconnexion</a>
                 <?php endif; ?>
 	</header>
